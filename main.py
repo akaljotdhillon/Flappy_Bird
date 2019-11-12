@@ -11,7 +11,6 @@ SCREEN_HEIGHT = 500
 ANIMATION_SPEED = 0.1
 
 class Bird(pygame.sprite.Sprite):
-
     WIDTH = HEIGHT = 32
     SINK_SPEED = 0.12
     CLIMB_SPEED = 0.19
@@ -20,9 +19,9 @@ class Bird(pygame.sprite.Sprite):
     def __init__(self, free_fall_time, images):
 
         super(Bird, self).__init__()
-        
-        #set bird attributes
-        self.x, self.y = int(SCREEN_WIDTH*0.15),int(SCREEN_HEIGHT/2)
+
+        # set bird attributes
+        self.x, self.y = int(SCREEN_WIDTH * 0.15), int(SCREEN_HEIGHT / 2)
         self.free_fall_time = free_fall_time
         self._wing_up_, self._wing_down_ = images
         self._mask_wingup = pygame.mask.from_surface(self._wing_up_)
@@ -35,15 +34,15 @@ class Bird(pygame.sprite.Sprite):
         if self.free_fall_time > 0:
 
             frac_climb_done = 1 - self.free_fall_time / Bird.CLIMB_DURATION
-            self.y -= (Bird.CLIMB_SPEED * frames_to_msec(delta_frames) *
+            self.y -= (Bird.CLIMB_SPEED * conversions.frames_to_msec(delta_frames) *
                        (1 - math.cos(frac_climb_done * math.pi)))
 
-            self.free_fall_time -= frames_to_msec(delta_frames)
+            self.free_fall_time -= conversions.frames_to_msec(delta_frames)
         else:
-            self.y += Bird.SINK_SPEED * frames_to_msec(delta_frames)
+            self.y += Bird.SINK_SPEED * conversions.frames_to_msec(delta_frames)
 
     @property
-    def animate_wings(self):
+    def animate(self):
         # switches bird's wing up and down images depending on milliseconds
         if pygame.time.get_ticks() % 31 >= 4:
             return self._wing_up_
@@ -52,6 +51,10 @@ class Bird(pygame.sprite.Sprite):
 
     @property
     def mask(self):
+        """Get a bitmask for use in collision detection.
+
+        The bitmask excludes all pixels in self.image with a
+        transparency greater than 127."""
         if pygame.time.get_ticks() % 500 >= 250:
             return self._mask_wingup
         else:
@@ -96,8 +99,13 @@ class PipePair(pygame.sprite.Sprite):
             self.image.blit(pipe_body_img, (0, i * PipePair.PIECE_HEIGHT))
         top_pipe_end_y = self.top_height_pixel
         self.image.blit(pipe_end_img, (0, top_pipe_end_y))
+        
+class conversions():
+    def frames_milliseconds(frames, fps=FPS):
+        return 1000.0 * frames / fps
 
-
+    def msec_to_frames(milliseconds, fps=FPS):
+        return fps * milliseconds / 1000.0
 
 
 
