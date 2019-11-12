@@ -221,6 +221,19 @@ def main():
     while not done:
         clock.tick(FPS)
 
+        if not (frame_clock % conversions.msec_to_frames(PipePair.ADD_INTERVAL)):
+          pipes.append(PipePair(pipes_images))
+
+        for x in (0, SCREEN_WIDTH / 2):
+            backend_frame.blit(load_image('background'), (x, 0))
+
+        bird.update()
+        backend_frame.blit(bird.animate, bird.rect)
+
+        for p in pipes:
+            p.update()
+            backend_frame.blit(p.image, p.rect)
+
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
                 done = True
@@ -229,19 +242,9 @@ def main():
                                                  event.key in (K_UP, K_RETURN, K_SPACE)):
                 bird.free_fall_time = Bird.CLIMB_DURATION
 
-
-        for x in (0, SCREEN_WIDTH / 2):
-            backend_frame.blit(load_image('background'), (x, 0))
-
-        bird.update()
-        backend_frame.blit(bird.animate, bird.rect)
-
         #updates surface
         pygame.display.flip()
         frame_clock += 1
-        clock.tick(FPS)
-        for x in (0, SCREEN_WIDTH / 2):
-            backend_frame.blit(load_image('background'), (x, 0))
 
 
     print('Game over! Score: %i' % score)
