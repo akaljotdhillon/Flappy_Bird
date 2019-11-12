@@ -25,7 +25,42 @@ class Bird(pygame.sprite.Sprite):
         self.x, self.y = int(SCREEN_WIDTH*0.15),int(SCREEN_HEIGHT/2)
         self.free_fall_time = free_fall_time
         self._wing_up_, self._wing_down_ = images
+        self._mask_wingup = pygame.mask.from_surface(self._wing_up_)
+        self._mask_wingdown = pygame.mask.from_surface(self._wing_down_)
 
+    def update(self, delta_frames=1):
+        # update bird frame
+
+        # if bird is allowed to fall free without any intervention
+        if self.free_fall_time > 0:
+
+            frac_climb_done = 1 - self.free_fall_time / Bird.CLIMB_DURATION
+            self.y -= (Bird.CLIMB_SPEED * frames_to_msec(delta_frames) *
+                       (1 - math.cos(frac_climb_done * math.pi)))
+
+            self.free_fall_time -= frames_to_msec(delta_frames)
+        else:
+            self.y += Bird.SINK_SPEED * frames_to_msec(delta_frames)
+
+    @property
+    def animate_wings(self):
+        # switches bird's wing up and down images depending on milliseconds
+        if pygame.time.get_ticks() % 31 >= 4:
+            return self._wing_up_
+        else:
+            return self._wing_down_
+
+    @property
+    def mask(self):
+        if pygame.time.get_ticks() % 500 >= 250:
+            return self._mask_wingup
+        else:
+            return self._mask_wingdown
+
+    @property
+    def rect(self):
+        """Get the bird's position, width, and height, as a pygame.Rect."""
+        return Rect(self.x, self.y, Bird.WIDTH, Bird.HEIGHT)
 
 
 
@@ -105,12 +140,13 @@ def main():
 
     pipes = deque()
 
-
     frame_clock = 0  # this counter is only incremented if the game isn't paused
     score = 0
     done = paused = False
 
-
+    while done:
+        clock.tick(FPS)
+        bird.free_fall_time = Bird.CLIMB_DURATION
 
 
 
