@@ -220,8 +220,29 @@ def main():
     done = False
     while not done:
         clock.tick(FPS)
+
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
+                done = True
+                break
+            elif event.type == MOUSEBUTTONUP or (event.type == KEYUP and
+                                                 event.key in (K_UP, K_RETURN, K_SPACE)):
+                bird.free_fall_time = Bird.CLIMB_DURATION
+
+
         for x in (0, SCREEN_WIDTH / 2):
             backend_frame.blit(load_image('background'), (x, 0))
+
+        bird.update()
+        backend_frame.blit(bird.animate, bird.rect)
+
+        #updates surface
+        pygame.display.flip()
+        frame_clock += 1
+        clock.tick(FPS)
+        for x in (0, SCREEN_WIDTH / 2):
+            backend_frame.blit(load_image('background'), (x, 0))
+
 
     print('Game over! Score: %i' % score)
     pygame.quit()
