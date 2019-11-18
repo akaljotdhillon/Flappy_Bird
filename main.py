@@ -67,34 +67,7 @@ class Bird(pygame.sprite.Sprite):
         return Rect(self.x, self.y, Bird.WIDTH, Bird.HEIGHT)
 
 
-class PipePair(pygame.sprite.Sprite):
-    """Represents an obstacle.
-
-    A PipePair has a top and a bottom pipe, and only between them can
-    the bird pass -- if it collides with either part, the game is over.
-
-    Attributes:
-    x: The PipePair's X position.  This is a float, to make movement
-        smoother.  Note that there is no y attribute, as it will only
-        ever be 0.
-    image: A pygame.Surface which can be blitted to the display surface
-        to display the PipePair.
-    mask: A bitmask which excludes all pixels in self.image with a
-        transparency greater than 127.  This can be used for collision
-        detection.
-    pipe_tp: The number of pieces, including the end piece, in the
-        top pipe.
-    pipe_bl: The number of pieces, including the end piece, in
-        the bottom pipe.
-
-    Constants:
-    WIDTH: The width, in pixels, of a pipe piece.  Because a pipe is
-        only one piece wide, this is also the width of a PipePair's
-        image.
-    PIECE_HEIGHT: The height, in pixels, of a pipe piece.
-    ADD_INTERVAL: The interval, in milliseconds, in between adding new
-        pipes.
-    """
+class PipePair(pygame.sprite.Sprite):s
 
     WIDTH = 80
     PIECE_HEIGHT = 32
@@ -241,6 +214,22 @@ def main():
             elif event.type == MOUSEBUTTONUP or (event.type == KEYUP and
                                                  event.key in (K_UP, K_RETURN, K_SPACE)):
                 bird.free_fall_time = Bird.CLIMB_DURATION
+
+        # update and display score
+        for p in pipes:
+            if p.x + PipePair.WIDTH < bird.x and not p.score_count:
+                score += 1
+                p.score_count = True
+
+        #score updation and siplay
+        score_surface = score_style.render("Score: " + str(score), True, (255, 255, 255))
+        score_x = SCREEN_WIDTH / 2 - score_surface.get_width() / 2
+        backend_frame.blit(score_surface, (score_x, PipePair.PIECE_HEIGHT))
+
+        #collision check
+        pipe_collision = any(p.collides_with(bird) for p in pipes)
+        if pipe_collision or 0 >= bird.y or bird.y >= SCREEN_HEIGHT - Bird.HEIGHT:
+            done = True
 
         #updates surface
         pygame.display.flip()
